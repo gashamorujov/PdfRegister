@@ -1,0 +1,35 @@
+{
+  "name": "docflow",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Azerbaijani document intake and admin management application",
+  "license": "UNLICENSED",
+  "main": "server/src/index.js",
+  "scripts": {
+    "test": "node --test",
+    "start": "node server/src/index.js",
+    "dev": "node --watch server/src/index.js",
+    "check": "node --check server/src/index.js && node --check server/src/mtproto.js && node --check public/app.js"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.7",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.1",
+    "firebase-admin": "^14.5.0",
+    "helmet": "^8.3.0",
+    "multer": "^2.4.0",
+    "pdfkit": "^0.20.2",
+    "sharp": "^0.35.5",
+    "telegram": "^2.26.22",
+    "uuid": "^14.0.3",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "supertest": "^7.3.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

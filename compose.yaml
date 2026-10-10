@@ -1,0 +1,24 @@
+services:
+  app:
+    build: .
+    image: docflow:latest
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOST: 0.0.0.0
+      BASE_PATH: "${BASE_PATH:-}"
+    ports:
+      - "${HOST_PORT:-3000}:3000"
+    volumes:
+      - docflow_data:/app/storage
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+volumes:
+  docflow_data:

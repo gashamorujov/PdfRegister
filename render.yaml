@@ -1,0 +1,19 @@
+# Render blueprint. "New +" -> "Blueprint" ilə bu repodan birbaşa deploy edin.
+# Qeyd: persistent disk yalnız pullu planlarda var; disk olmadan məlumat restart zamanı sıfırlanır.
+services:
+  - type: web
+    name: docflow
+    runtime: node
+    plan: starter
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: ADMIN_CODE
+        sync: false

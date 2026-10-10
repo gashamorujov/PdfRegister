@@ -1,0 +1,9 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "documents": { ".read": false, ".write": false },
+    "samples": { ".read": false, ".write": false },
+    "audit": { ".read": false, ".write": false }
+  }
+}

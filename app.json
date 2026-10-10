@@ -1,0 +1,12 @@
+{
+  "name": "docflow",
+  "description": "Sənəd Axını — sənəd qəbulu və admin paneli",
+  "keywords": ["node", "express", "pdf", "document"],
+  "stack": "heroku-22",
+  "buildpacks": [{ "url": "heroku/nodejs" }],
+  "env": {
+    "NODE_ENV": { "value": "production" },
+    "SESSION_SECRET": { "generator": "secret" }
+  },
+  "formation": { "web": { "quantity": 1 } }
+}

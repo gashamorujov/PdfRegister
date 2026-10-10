@@ -1,0 +1,54 @@
+# Nümunə reverse proxy konfiqurasiyası (Docker Compose default portu: 3000).
+# .env: TRUST_PROXY_HOPS=1 və PUBLIC_ORIGIN=https://documents.example.com
+
+server {
+  listen 80;
+  server_name documents.example.com;
+  return 301 https://$host$request_uri;
+}
+
+server {
+  listen 443 ssl;
+  http2 on;
+  server_name documents.example.com;
+
+  ssl_certificate     /etc/letsencrypt/live/documents.example.com/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/documents.example.com/privkey.pem;
+
+  client_max_body_size 40m;   # 20 şəkil x MAX_UPLOAD_MB-dən böyük ola bilər; lazım olsa artırın
+  proxy_read_timeout   120s;
+
+  gzip on;
+  gzip_types text/css application/javascript application/json image/svg+xml;
+
+  add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+  location / {
+    proxy_pass http://127.0.0.1:3000;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  }
+}
+
+# --- Alt-qovluq (BASE_PATH) variantı -------------------------------------------------
+# .env: BASE_PATH=/docflow
+# Nginx prefiksi olduğu kimi ötürməlidir (rewrite lazım deyil), çünki tətbiq özü
+# /docflow prefiksini qəbul edir və frontend bütün ünvanları nisbi qurur.
+#
+# server {
+#   listen 443 ssl;
+#   server_name documents.example.com;
+#   ssl_certificate     /etc/letsencrypt/live/documents.example.com/fullchain.pem;
+#   ssl_certificate_key /etc/letsencrypt/live/documents.example.com/privkey.pem;
+#
+#   location /docflow/ {
+#     proxy_pass http://127.0.0.1:3000;
+#     proxy_http_version 1.1;
+#     proxy_set_header Host $host;
+#     proxy_set_header X-Forwarded-Proto $scheme;
+#     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+#   }
+# }
