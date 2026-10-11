@@ -24,7 +24,8 @@
     "sharp": "^0.35.5",
     "telegram": "^2.26.22",
     "uuid": "^14.0.3",
-    "zod": "^4.6.5"
+    "zod": "^4.6.5",
+    "serverless-http": "^4.0.0"
   },
   "devDependencies": {
     "supertest": "^7.3.1"
