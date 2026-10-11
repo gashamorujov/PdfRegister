@@ -14,4 +14,4 @@ audit/{auditId}
 settings/samplesIntro
 ```
 
-Frontend birbaşa Firebase yazmır; bütün yazma əməliyyatları backend tərəfindən autentifikasiya və validasiya ilə edilir. Admin tokeni HTTP-only cookie-dir.
+Backend Firebase Admin SDK ilə sənəd metadata-sını Realtime Database-də saxlayır. Admin brauzeri HTTP-only sessiya ilə qorunan server endpoint-inə bağlanır; backend RTDB listener hadisələrini server-sent events ilə göndərir. Brauzer birbaşa database-ə yazmır. Admin service-account private key yalnız hosting-in secret manager-ində saxlanmalıdır.

@@ -105,7 +105,7 @@ app.json       Heroku "Deploy to Heroku" düyməsi üçün
 
 ## Platforma və persistence qeydləri
 
-Bu paket Dockerfile və `compose.yaml` ilə standart Docker host-larına uyğun hazırlanıb. JSON database və sənəd faylları lokal `storage/` qovluğunda saxlanıldığı üçün hazır versiya **single-instance/single-replica** deploy üçündür. Serverless və ya ephemeral filesystem istifadə edən platformada persistent volume attach etmədən deploy etməyin; əks halda restart zamanı məlumatlar itə bilər. Üfüqi miqyaslama üçün ortaq verilənlər bazası və obyekt saxlanması adapteri əlavə edilməlidir. Firebase aktiv olduqda metadata Firebase-ə də sinxronlaşır, lakin PDF-lər yenə persistent `storage/`-da saxlanılır.
+Bu paket Dockerfile və `compose.yaml` ilə standart Docker host-larına uyğun hazırlanıb. JSON database və sənəd faylları lokal `storage/` qovluğunda saxlanıldığı üçün hazır versiya **single-instance/single-replica** deploy üçündür. Serverless və ya ephemeral filesystem istifadə edən platformada persistent volume attach etmədən deploy etməyin; əks halda restart zamanı məlumatlar itə bilər. Üfüqi miqyaslama üçün ortaq verilənlər bazası və obyekt saxlanması adapteri əlavə edilməlidir. Firebase Admin service-account credentials qoşulduqda sənəd metadata-sı Realtime Database-ə yazılır, admin siyahısı Firebase dəyişikliklərini canlı dinləyir. PDF serverdə və Telegram kanalında saxlanır; server faylı olmadıqda admin PDF-i Telegram `file_id` ilə oxuya bilər. Telegram və Firebase üçün onların müvafiq secret-ləri hostun secret manager-ində qurulmalıdır.
 
 ## Environment variables
 
@@ -122,7 +122,7 @@ Bu paket Dockerfile və `compose.yaml` ilə standart Docker host-larına uyğun 
 | `TRUST_PROXY_HOPS` | Proxy olduqda | Etibarlı reverse proxy sayı; adətən `1` |
 | `MAX_UPLOAD_MB` | Xeyr | Hər şəkil üçün maksimum fayl ölçüsü; default `15` MB |
 | `STORAGE_DIR` | Xeyr | Persistent məlumat qovluğunun yolu; default layihədəki `storage/` |
-| `FIREBASE_*` | Xeyr | Firebase Admin service-account konfiqurasiyası |
+| `FIREBASE_*` | Firebase real-time üçün | Project ID, service-account email/private key, Realtime Database URL və Storage bucket; private key-i yalnız hosting secrets-də saxlayın |
 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHANNEL_ID` | Xeyr | Telegram Bot API sinxronizasiyası |
 | `TELEGRAM_API_ID`, `TELEGRAM_API_HASH` | Xeyr | Telegram MTProto inteqrasiyası |
 
