@@ -7,6 +7,7 @@ const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 
 /* Deployment-agnostic URL resolver: works at the domain root or under any sub-path (BASE_PATH). */
 const BASE_URL = new URL('.', document.baseURI);
+const STATIC_PUBLIC_PREFIX = $('meta[name="docflow-static-root"]')?.content || '';
 const resolveUrl = url => {
   const raw = String(url ?? '');
   if (!raw) return raw;
@@ -171,6 +172,7 @@ function shell(content, screen) {
   $('#app').innerHTML = `<div class="page">
     <header class="topbar"><div class="topbar-inner">
       <button type="button" class="brand" data-action="logo" aria-label="AGG"><span class="brand-mark">AGG</span><span class="brand-text">Sənəd Axını</span></button>
+      <button type="button" class="btn btn-sm" data-action="admin-login">${icon('lock', 'sm')} Admin</button>
     </div></header>
     <main class="main" id="main">${content}</main>
   </div>`;
@@ -215,10 +217,6 @@ function confirmDialog({ title, message, confirm = 'Təsdiqlə', danger = false 
 function home() {
   const n = state.images.length;
   shell(`
-    <section class="intro">
-      <h1>Sənədlərinizi göndərin</h1>
-      <p>Sənədlərinizin şəklini çəkin və ya qalereyadan seçin. Şəkillər avtomatik PDF-ə çevrilərək qəbula göndərilir.</p>
-    </section>
     ${n ? `<div class="resume" role="region" aria-label="Davam et">
       <div><strong>${n} şəkil hazırdır</strong><span class="muted small">Əvvəl əlavə etdiyiniz şəkillər saxlanılıb.</span></div>
       <div class="row start"><button type="button" class="btn btn-ghost btn-sm" data-action="clear">Təmizlə</button>
@@ -450,7 +448,22 @@ async function submitDocuments(btn) {
 
 /* ---------- Samples (public) ---------- */
 async function openSamples() {
-  const d = await api('/api/samples');
+  let d;
+  try { d = await api('/api/samples'); } catch (err) { console.warn('Nümunə API-si əlçatan deyil:', err.message); }
+  if (!Array.isArray(d?.samples)) {
+    const files = [
+      ['1791621827633.jpeg', 'Tibbi sertifikat'],
+      ['1791621827645.jpeg', 'Şəxsiyyət vəsiqəsi — ön'],
+      ['1791621827656.jpeg', 'Şəxsiyyət vəsiqəsi — arxa'],
+      ['1791622170292.png', 'Tibbi müayinə nümunəsi'],
+      ['1791622864723.jpg', 'Tibbi sertifikat'],
+      ['1791622864731.jpg', 'Tibbi sertifikat çıxarışı'],
+      ['1791622864741.jpeg', 'Bakalavr diplomu'],
+      ['1791622864755.jpeg', 'Növbə motorçusu sertifikatı']
+    ];
+    const prefix = STATIC_PUBLIC_PREFIX;
+    d = { samples: files.map(([file, title], order) => ({ title, order, src: `${prefix}/samples/${file}` })) };
+  }
   shell(`<div class="page-head"><div><h2>Nümunələr</h2>${d.intro ? `<p>${esc(d.intro)}</p>` : ''}</div>
       <button type="button" class="btn btn-sm" data-action="home">${icon('arrow-left', 'sm')} Geri</button></div>
     <div class="stack narrow">${d.samples.length ? d.samples.map(x => `<figure class="sample-card"><img src="${esc(resolveUrl(x.src))}" alt="${esc(x.title)}" loading="lazy" decoding="async"><figcaption>${esc(x.title)}</figcaption></figure>`).join('')
@@ -655,6 +668,7 @@ let logoTaps = 0, logoTimer = null;
 const actions = {
   logo() { logoTaps++; clearTimeout(logoTimer); logoTimer = setTimeout(() => { logoTaps = 0; }, 700); if (logoTaps >= 4) { logoTaps = 0; loginModal(); } },
   home: () => home(),
+  'admin-login': () => loginModal(),
   camera: () => camera(),
   gallery: () => $('#picker').click(),
   samples: guard(openSamples),
