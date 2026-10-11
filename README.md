@@ -1,6 +1,6 @@
 # Sənəd Axını
 
-Azərbaycan dilində mobil-first sənəd qəbul sistemi. İstifadəçilər şəkilləri kamera və ya qalereyadan seçir, sistem onları PDF-ə çevirir; admin paneldən sənədlər idarə olunur. Firebase və Telegram inteqrasiyaları istəyə bağlıdır.
+Azərbaycan dilində mobil-first sənəd qəbul sistemi. İstifadəçilər şəkilləri kamera və ya qalereyadan seçir, sistem onları PDF-ə çevirir; admin paneldən sənədlər idarə olunur. Firebase Realtime Database sənəd metadata-sı və admin dəyişikliklərini sinxronlaşdırır; Telegram PDF faylları üçün istifadə olunur.
 
 ## Tələblər
 
@@ -24,8 +24,8 @@ Sayt `http://localhost:3000` ünvanında açılır. İlk quraşdırmada admin ko
 
 Server `PORT` (default `3000`), `HOST` (default `0.0.0.0`), `NODE_ENV` və `BASE_PATH` dəyişənlərinə hörmət edir. Firebase layihəsinin web konfiqurasiyası tətbiqdə hazırdır; admin kodu və `SESSION_SECRET` üçün ayrıca environment dəyəri tələb olunmur.
 
-- `npm ci && npm start` — Node 20+ olan istənilən VPS, PaaS və ya bare-metal host.
-- `docker compose up -d --build` və ya `docker build -t docflow . && docker run -p 3000:3000 docflow` — istənilən konteyner platforması.
+- `npm ci && npm start` — Node 20+ olan VPS, PaaS və ya bare-metal host; production-da Firebase ADC və ya service-account credentials olmalıdır.
+- `docker compose up -d --build` və ya `docker build -t docflow . && docker run -p 3000:3000 docflow` — konteyner platforması; Firebase-ə qoşulma üçün Google ADC və ya service-account credentials tələb olunur.
 - Hazır platforma faylları: `render.yaml` (Render), `fly.toml` (Fly.io), `railway.json` (Railway), `Procfile` + `app.json` (Heroku), `Dockerfile` (ümumi).
 - Health/readiness yoxlaması: `GET /healthz`.
 
