@@ -18,11 +18,11 @@ npm test
 npm start
 ```
 
-Sayt `http://localhost:3000` ünvanında açılır. Local development admin kodu `.env`-dəki `ADMIN_CODE`-dur (`0706` yalnız development üçündür).
+Sayt `http://localhost:3000` ünvanında açılır. İlk quraşdırmada admin kodu `0706` olur və gizli admin panelində dəyişdirilə bilər.
 
 ## Hər yerdə deploy etmək (PaaS, VPS, Docker)
 
-Server `PORT` (default `3000`), `HOST` (default `0.0.0.0`), `NODE_ENV` və `BASE_PATH` dəyişənlərinə hörmət edir. Xüsusi environment dəyişəni verilməsə belə sayt açılır:
+Server `PORT` (default `3000`), `HOST` (default `0.0.0.0`), `NODE_ENV` və `BASE_PATH` dəyişənlərinə hörmət edir. Firebase layihəsinin web konfiqurasiyası tətbiqdə hazırdır; admin kodu və `SESSION_SECRET` üçün ayrıca environment dəyəri tələb olunmur.
 
 - `npm ci && npm start` — Node 20+ olan istənilən VPS, PaaS və ya bare-metal host.
 - `docker compose up -d --build` və ya `docker build -t docflow . && docker run -p 3000:3000 docflow` — istənilən konteyner platforması.
@@ -31,8 +31,9 @@ Server `PORT` (default `3000`), `HOST` (default `0.0.0.0`), `NODE_ENV` və `BASE
 
 İlk işə düşmə davranışı:
 
-- `SESSION_SECRET` boşdursa `storage/.session-secret` daxilində təsadüfi secret yaradılır və restart-lar arasında saxlanılır.
-- Production-da `ADMIN_CODE` açıq şəkildə təyin edilməlidir (ən azı 12 simvol; `0706` qəbul edilmir). Firebase və Telegram inteqrasiyaları aktiv deploy üçün onların server secret-ləri də tələb olunur. Bu secret-ləri hostun secret manager-ində saxlayın; repo-ya yazmayın.
+- İlk işə düşmədə admin kodu `0706` olaraq yaradılır; paneldən istənilən vaxt dəyişə bilərsiniz. Yeni kod minimum 4 simvol olmalıdır.
+- Google Cloud/Firebase hostunda Firebase Admin SDK Application Default Credentials (ADC) ilə qoşulur; service-account email/private-key dəyişənləri lazım deyil. Netlify, Vercel və Google olmayan hostlarda ADC olmadığı üçün Firebase service-account credentials platformanın secret manager-ində olmalıdır. Firebase web `apiKey` bunu əvəz etmir.
+- `SESSION_SECRET` verilməsə, Telegram/MTProto konfiqurasiyasını şifrələmək üçün təsadüfi dəyər `storage/.session-secret`-də yaradılır; həmin inteqrasiyanı istifadə edirsinizsə `storage/` persistent olmalıdır.
 - `storage/` yazıla bilmirsə (read-only və ya ephemeral fayl sistemi) server `os.tmpdir()`-ə keçir və xəbərdarlıq yazır — sayt yenə açılır, lakin məlumat restart zamanı itə bilər. Production üçün həmişə persistent volume/disk qoşun.
 - Alt-qovluqda deploy edirsinizsə `BASE_PATH=/docflow` təyin edin; frontend API, PDF və statik fayl ünvanlarını avtomatik uyğunlaşdırır (`https://example.com/docflow/...`).
 - Reverse proxy arxasındadırsa `TRUST_PROXY_HOPS=1` verin. Cookie-lər uyğunlaşır: HTTPS-də `Secure; SameSite=None`, düz HTTP-də `Secure`siz `SameSite=Lax` — yəni lokal/HTTP deployda da admin girişi işləyir.
@@ -45,24 +46,7 @@ Server `PORT` (default `3000`), `HOST` (default `0.0.0.0`), `NODE_ENV` və `BASE
    cp .env.example .env
    ```
 
-   `.env`-də ən azı bunları dəyişin:
-
-   ```env
-   NODE_ENV=production
-   ADMIN_CODE=your-unique-admin-code-at-least-12-chars
-   SESSION_SECRET=   # aşağıdakı komandadan yaradılmış 64 hex simvol
-   PUBLIC_ORIGIN=https://your-domain.example
-   TRUST_PROXY_HOPS=1
-   ```
-
-   Admin kodu və şifrələmə secret-i üçün təsadüfi dəyərlər yaradın; nəticələri `.env`-ə yazın:
-
-   ```bash
-   openssl rand -hex 8  # ADMIN_CODE üçün 16 simvolluq dəyər
-   openssl rand -hex 32 # SESSION_SECRET üçün 64 simvolluq dəyər
-   ```
-
-   `ADMIN_CODE`/`SESSION_SECRET` verilməzsə (və ya `ADMIN_CODE=0706` olsa) server avtomatik güclü dəyərlər yaradır — yuxarıdaki bölməyə baxın. Açıq şəkildə verilən `ADMIN_CODE` ən azı 12 simvol olmalıdır, əks halda server xəta ilə dayanır. `SESSION_SECRET` ən azı 32 simvol olmalı və server yenidən başladıqdan sonra dəyişməməlidir; bu secret Telegram/MTProto məlumatlarını şifrələmək üçün istifadə olunur. Mövcud admin kodunu paneldən dəyişirsinizsə, production-da yeni kod da ən azı 12 simvol olmalıdır. `.env` faylını git repozitoriyasına əlavə etməyin.
+   `.env`-də `NODE_ENV=production`, `PUBLIC_ORIGIN` və proxy arxasında işlədikdə `TRUST_PROXY_HOPS=1` dəyərlərini qurun. Admin kodu ilk startda `0706` olur; ilk girişdən sonra gizli admin panelindən dəyişin. Google Cloud/Firebase hostunda ADC avtomatik işləyir. Netlify/Vercel kimi Google olmayan hostda Firebase Admin credentials platformanın secret manager-ində lazımdır. `.env` faylını repoya əlavə etməyin.
 
 2. Deploy edin:
 
@@ -105,24 +89,24 @@ app.json       Heroku "Deploy to Heroku" düyməsi üçün
 
 ## Platforma və persistence qeydləri
 
-Bu paket Dockerfile və `compose.yaml` ilə standart Docker host-larına uyğun hazırlanıb. JSON database və sənəd faylları lokal `storage/` qovluğunda saxlanıldığı üçün hazır versiya **single-instance/single-replica** deploy üçündür. Serverless və ya ephemeral filesystem istifadə edən platformada persistent volume attach etmədən deploy etməyin; əks halda restart zamanı məlumatlar itə bilər. Üfüqi miqyaslama üçün ortaq verilənlər bazası və obyekt saxlanması adapteri əlavə edilməlidir. Firebase Admin service-account credentials qoşulduqda sənəd metadata-sı Realtime Database-ə yazılır, admin siyahısı Firebase dəyişikliklərini canlı dinləyir. PDF serverdə və Telegram kanalında saxlanır; server faylı olmadıqda admin PDF-i Telegram `file_id` ilə oxuya bilər. Telegram və Firebase üçün onların müvafiq secret-ləri hostun secret manager-ində qurulmalıdır.
+Bu paket Dockerfile və `compose.yaml` ilə standart Docker host-larına uyğun hazırlanıb. JSON database və sənəd faylları lokal `storage/` qovluğunda saxlanıldığı üçün hazır versiya **single-instance/single-replica** deploy üçündür. Serverless və ya ephemeral filesystem istifadə edən platformada persistent volume attach etmədən deploy etməyin; əks halda restart zamanı məlumatlar itə bilər. Üfüqi miqyaslama üçün ortaq verilənlər bazası və obyekt saxlanması adapteri əlavə edilməlidir. Firebase Admin SDK ilə sənəd metadata-sı Realtime Database-ə yazılır, admin siyahısı dəyişiklikləri canlı alır. Google hostlarında ADC istifadə edilir; başqa hostlarda service-account credentials secret manager-də olmalıdır. PDF serverdə və Telegram kanalında saxlanır; server faylı olmadıqda admin PDF-i Telegram `file_id` ilə oxuya bilər.
 
 ## Environment variables
 
 | Dəyişən | Tələb | Təsviri |
 |---|---:|---|
-| `NODE_ENV` | Production-da | `production` olduqda güclü admin kodu və session secret yoxlanılır |
+| `NODE_ENV` | Production-da | `production` rejimini aktivləşdirir |
 | `PORT` | Xeyr | Server portu; default `3000` (PaaS platformaları özləri verir) |
 | `HOST` | Xeyr | Bind olunacaq host; default `0.0.0.0` |
 | `BASE_PATH` | Xeyr | Alt-qovluq deployu, məsələn `/docflow`; boş olduqda domain kökü |
-| `ADMIN_CODE` | Production-da | Unikal admin kodu, ən azı 12 simvol |
-| `SESSION_SECRET` | Production-da | Ən azı 32 simvolluq təsadüfi secret; Telegram/MTProto məlumatlarını şifrələyir |
+| `ADMIN_CODE` | Xeyr | İlkin admin kodu `0706`; admin panelindən dəyişdirilir |
+| `SESSION_SECRET` | Xeyr | Telegram/MTProto məlumatlarını şifrələmək üçün; boş olduqda yaradılır |
 | `PUBLIC_ORIGIN` | Tövsiyə olunur | Public sayt origin-i, məsələn `https://docs.example.com` |
 | `ALLOWED_ORIGINS` | Xeyr | Əlavə etibarlı frontend origin-ləri, vergüllə ayrılmış |
 | `TRUST_PROXY_HOPS` | Proxy olduqda | Etibarlı reverse proxy sayı; adətən `1` |
 | `MAX_UPLOAD_MB` | Xeyr | Hər şəkil üçün maksimum fayl ölçüsü; default `15` MB |
 | `STORAGE_DIR` | Xeyr | Persistent məlumat qovluğunun yolu; default layihədəki `storage/` |
-| `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` | Production-da tələb olunur | Firebase Admin service account; private key-i yalnız hosting secrets-də saxlayın. Public web config-dən project ID və Database URL tətbiqdə default verilib, istəsəniz env ilə override edə bilərsiniz. |
+| Firebase service account | Google hostunda yox | Google ADC avtomatik istifadə olunur. Netlify/Vercel kimi hostlarda service-account credentials secret manager-də lazımdır. |
 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHANNEL_ID` | Production-da tələb olunur | PDF fayllarının Telegram kanalına saxlanması və Bot API sinxronizasiyası |
 | `TELEGRAM_API_ID`, `TELEGRAM_API_HASH` | Xeyr | Telegram MTProto inteqrasiyası |
 
@@ -133,7 +117,7 @@ Bu paket Dockerfile və `compose.yaml` ilə standart Docker host-larına uyğun 
 - Nümunə şəkilləri 7 gün keşlənir, `app.js`/`styles.css` isə hər açılışda yenidən yoxlanılır (deploy-dan sonra köhnə versiya qalmır).
 - Admin session random, opaque token-dur; serverdə yalnız SHA-256 hash saxlanır. Çıxış zamanı sessiya tokeni etibarsız edilir.
 - Admin POST/PATCH/DELETE sorğularında Origin yoxlanır; CORS yalnız same-origin və konfiqurasiya edilmiş origin-lərə açılır.
-- Production-da zəif və ya buraxılmış `ADMIN_CODE` və `SESSION_SECRET` serverin işə düşməsini dayandırır.
+- Production-da Firebase bağlantısı vacibdir: Google ADC və ya hostun secret manager-ində service-account credentials olmalıdır.
 - JSON store faylı atomik yazılır; production database faylı zədəlidirsə səssizcə boş store yaratmaq əvəzinə serverin işə düşməsi dayandırılır.
 - Firebase rules nümunəsi `docs/firebase.rules.json` içindədir; deploy zamanı Firebase-də tətbiq edin.
 
