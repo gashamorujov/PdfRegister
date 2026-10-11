@@ -173,7 +173,6 @@ function shell(content, screen) {
   $('#app').innerHTML = `<div class="page">
     <header class="topbar"><div class="topbar-inner">
       <button type="button" class="brand" data-action="logo" aria-label="AGG"><span class="brand-mark">AGG</span><span class="brand-text">Sənəd Axını</span></button>
-      <button type="button" class="btn btn-sm" data-action="admin-login">${icon('lock', 'sm')} Admin</button>
     </div></header>
     <main class="main" id="main">${content}</main>
   </div>`;
@@ -673,7 +672,6 @@ let logoTaps = 0, logoTimer = null;
 const actions = {
   logo() { logoTaps++; clearTimeout(logoTimer); logoTimer = setTimeout(() => { logoTaps = 0; }, 700); if (logoTaps >= 4) { logoTaps = 0; loginModal(); } },
   home: () => home(),
-  'admin-login': () => loginModal(),
   camera: () => camera(),
   gallery: () => $('#picker').click(),
   samples: guard(openSamples),

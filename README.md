@@ -122,7 +122,7 @@ Bu paket Dockerfile və `compose.yaml` ilə standart Docker host-larına uyğun 
 | `TRUST_PROXY_HOPS` | Proxy olduqda | Etibarlı reverse proxy sayı; adətən `1` |
 | `MAX_UPLOAD_MB` | Xeyr | Hər şəkil üçün maksimum fayl ölçüsü; default `15` MB |
 | `STORAGE_DIR` | Xeyr | Persistent məlumat qovluğunun yolu; default layihədəki `storage/` |
-| `FIREBASE_*` | Production-da tələb olunur | Project ID, service-account email/private key, Realtime Database URL; private key-i yalnız hosting secrets-də saxlayın |
+| `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` | Production-da tələb olunur | Firebase Admin service account; private key-i yalnız hosting secrets-də saxlayın. Public web config-dən project ID və Database URL tətbiqdə default verilib, istəsəniz env ilə override edə bilərsiniz. |
 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHANNEL_ID` | Production-da tələb olunur | PDF fayllarının Telegram kanalına saxlanması və Bot API sinxronizasiyası |
 | `TELEGRAM_API_ID`, `TELEGRAM_API_HASH` | Xeyr | Telegram MTProto inteqrasiyası |
 
