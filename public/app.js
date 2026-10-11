@@ -568,6 +568,7 @@ async function adminDocs(silent = false) {
   renderDocs(list);
   adminEvents = new EventSource(resolveUrl('/api/admin/events'));
   adminEvents.addEventListener('documents', () => refreshDocs(true).catch(handleError));
+  adminEvents.addEventListener('sync-error', () => { if (!pollTimer) pollTimer = setInterval(() => refreshDocs(true).catch(handleError), 5000); });
   adminEvents.onopen = () => { clearInterval(pollTimer); pollTimer = null; };
   adminEvents.onerror = () => { if (!pollTimer) pollTimer = setInterval(() => refreshDocs(true).catch(handleError), 5000); };
   return true;
