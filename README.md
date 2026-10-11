@@ -138,3 +138,12 @@ Bu paket Dockerfile və `compose.yaml` ilə standart Docker host-larına uyğun 
 - Firebase rules nümunəsi `docs/firebase.rules.json` içindədir; deploy zamanı Firebase-də tətbiq edin.
 
 İstehsalat mühitində hər hansı xarici inteqrasiyanı aktiv etməzdən əvvəl onun credential-larını platformanın secret manager-ində qurun. Heç bir `.env`, API key və ya Telegram session faylını arxivə/repoya yükləməyin.
+
+
+## Vercel, Netlify və statik hostlar
+
+- Vercel Express tətbiqini repozitoriyanın kökündəki `index.js` faylından başladır; statik fayllar `public/` qovluğundadır.
+- Netlify konfiqurasiyası `netlify.toml` və `netlify/functions/api.js` vasitəsilə `/api/*` və `/files/*` sorğularını Express tətbiqinə yönləndirir. GitHub deploy-da build əmri `npm run check`, publish qovluğu `public` olmalıdır.
+- EdgeOne kimi sadə statik hostlarda repozitoriyanın kökünü deploy edin. Kökdəki `index.html` tətbiqin ekranını açır, amma statik host özü API serveri yaratmır; sənəd göndərmə və admin əməliyyatları üçün Node.js serveri və ya platformanın funksiyaları lazımdır.
+- Vercel və Netlify funksiyalarının lokal fayl sistemi davamlı disk deyil. Sənədlərin, bazanın və admin sessiyasının redeploy/restart sonrası qalması üçün persistent saxlama qoşun. Serverless mühitdə `storage/`-a yazılan məlumatlara davamlı saxlama zəmanəti yoxdur.
+- Deploy-u repozitoriyanın kökündən edin və `package.json`-dakı Node.js tələbinə uyğun runtime seçin.
