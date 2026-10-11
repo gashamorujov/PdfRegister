@@ -161,7 +161,8 @@ function parsePhone(value) {
 
 /* ---------- Shell ---------- */
 function stopStream() { if (state.stream) { state.stream.getTracks().forEach(t => t.stop()); state.stream = null; } }
-function stopPolling() { clearInterval(pollTimer); pollTimer = null; }
+let adminEvents = null;
+function stopPolling() { clearInterval(pollTimer); pollTimer = null; if (adminEvents) { adminEvents.close(); adminEvents = null; } }
 function closeModal() { const m = $('.modal'); if (m) { const back = m._returnFocus; m.remove(); back?.focus?.(); } }
 
 function shell(content, screen) {
@@ -565,7 +566,9 @@ async function adminDocs(silent = false) {
     <section id="docs" class="doc-list" aria-live="polite"></section>`, 'admin');
   docsSig = '';
   renderDocs(list);
-  pollTimer = setInterval(() => refreshDocs(true).catch(handleError), 5000);
+  adminEvents = new EventSource(resolveUrl('/api/admin/events'));
+  adminEvents.addEventListener('documents', () => refreshDocs(true).catch(handleError));
+  adminEvents.onerror = () => { if (!pollTimer) pollTimer = setInterval(() => refreshDocs(true).catch(handleError), 5000); };
   return true;
 }
 
