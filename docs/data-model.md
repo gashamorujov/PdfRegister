@@ -14,4 +14,4 @@ audit/{auditId}
 settings/samplesIntro
 ```
 
-Backend Firebase Admin SDK ilə sənəd metadata-sını Realtime Database-də saxlayır. Admin brauzeri HTTP-only sessiya ilə qorunan server endpoint-inə bağlanır; backend RTDB listener hadisələrini server-sent events ilə göndərir. Brauzer birbaşa database-ə yazmır. Admin service-account private key yalnız hosting-in secret manager-ində saxlanmalıdır.
+Backend Firebase Admin SDK ilə sənəd metadata-sını Realtime Database-də saxlayır. Admin brauzeri HTTP-only sessiya ilə qorunan server endpoint-inə bağlanır; backend RTDB listener hadisələrini server-sent events ilə göndərir. Brauzer birbaşa database-ə yazmır. `adminSessions/{tokenHash}` daxilində sessiyanın bitmə vaxtı, `adminAuth/codeHash` daxilində dəyişdirilmiş admin kodunun hash-i saxlanılır. Admin service-account private key yalnız hosting-in secret manager-ində saxlanmalıdır.

@@ -32,7 +32,7 @@ Server `PORT` (default `3000`), `HOST` (default `0.0.0.0`), `NODE_ENV` və `BASE
 İlk işə düşmə davranışı:
 
 - `SESSION_SECRET` boşdursa `storage/.session-secret` daxilində təsadüfi secret yaradılır və restart-lar arasında saxlanılır.
-- `ADMIN_CODE` boşdursa və ya `.env.example`-dakı `0706` dəyərindədirsə (production-da) təsadüfi admin kodu yaradılır və **server log-una** yazılır; deploy loglarından götürüb dərhal dəyişin. `0706` production-da işləmir. Avtomatik kod hash-i `storage/`-da saxlanıldığı üçün restart-da dəyişmir və yenidən log-a düşmür.
+- Production-da `ADMIN_CODE` açıq şəkildə təyin edilməlidir (ən azı 12 simvol; `0706` qəbul edilmir). Firebase və Telegram inteqrasiyaları aktiv deploy üçün onların server secret-ləri də tələb olunur. Bu secret-ləri hostun secret manager-ində saxlayın; repo-ya yazmayın.
 - `storage/` yazıla bilmirsə (read-only və ya ephemeral fayl sistemi) server `os.tmpdir()`-ə keçir və xəbərdarlıq yazır — sayt yenə açılır, lakin məlumat restart zamanı itə bilər. Production üçün həmişə persistent volume/disk qoşun.
 - Alt-qovluqda deploy edirsinizsə `BASE_PATH=/docflow` təyin edin; frontend API, PDF və statik fayl ünvanlarını avtomatik uyğunlaşdırır (`https://example.com/docflow/...`).
 - Reverse proxy arxasındadırsa `TRUST_PROXY_HOPS=1` verin. Cookie-lər uyğunlaşır: HTTPS-də `Secure; SameSite=None`, düz HTTP-də `Secure`siz `SameSite=Lax` — yəni lokal/HTTP deployda da admin girişi işləyir.
@@ -122,8 +122,8 @@ Bu paket Dockerfile və `compose.yaml` ilə standart Docker host-larına uyğun 
 | `TRUST_PROXY_HOPS` | Proxy olduqda | Etibarlı reverse proxy sayı; adətən `1` |
 | `MAX_UPLOAD_MB` | Xeyr | Hər şəkil üçün maksimum fayl ölçüsü; default `15` MB |
 | `STORAGE_DIR` | Xeyr | Persistent məlumat qovluğunun yolu; default layihədəki `storage/` |
-| `FIREBASE_*` | Firebase real-time üçün | Project ID, service-account email/private key, Realtime Database URL və Storage bucket; private key-i yalnız hosting secrets-də saxlayın |
-| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHANNEL_ID` | Xeyr | Telegram Bot API sinxronizasiyası |
+| `FIREBASE_*` | Production-da tələb olunur | Project ID, service-account email/private key, Realtime Database URL; private key-i yalnız hosting secrets-də saxlayın |
+| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHANNEL_ID` | Production-da tələb olunur | PDF fayllarının Telegram kanalına saxlanması və Bot API sinxronizasiyası |
 | `TELEGRAM_API_ID`, `TELEGRAM_API_HASH` | Xeyr | Telegram MTProto inteqrasiyası |
 
 ## Health və security
